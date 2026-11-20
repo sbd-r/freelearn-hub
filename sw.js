@@ -1,5 +1,5 @@
-const CACHE = "freelearn-v3";
-const FILES = ["./", "index.html", "data.js", "data2.js", "data3.js", "manifest.json", "icon-192.png", "icon-512.png"];
+const CACHE = "freelearn-v4";
+const FILES = ["./", "index.html", "style.css", "app.js", "data.js", "data2a.js", "data2b.js", "data3.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
