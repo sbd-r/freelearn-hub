@@ -26,7 +26,7 @@ jobs:
       - name: Copy web files
         run: |
           mkdir -p www
-          cp index.html data.js manifest.json sw.js icon-192.png icon-512.png www/
+          cp index.html data.js data2.js data3.js manifest.json sw.js icon-192.png icon-512.png www/
 
       - name: Create Android project
         run: |
