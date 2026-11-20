@@ -33,6 +33,18 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Add AdMob App ID to Android manifest
+        run: |
+          python3 - <<'PY'
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p).read()
+          meta = '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-5053693807902862~4627902805"/>\n    '
+          assert "</application>" in s, "application tag not found"
+          s = s.replace("</application>", meta + "</application>", 1)
+          open(p, "w").write(s)
+          print("AdMob App ID added")
+          PY
+
       - name: Build debug APK
         run: |
           chmod +x android/gradlew
