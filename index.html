@@ -108,15 +108,42 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 20px 28px
 "use strict";
 /* ================= AD SETTINGS ================= */
 const AD = {
-  everyN: 1,              // show an ad before every Nth open (1 = every time)
-  seconds: 5,             // wait before "Continue" becomes active
-  admobInterstitialId: "",// your AdMob interstitial unit ID (native Android wrapper only)
-  // Uses Capacitor AdMob plugin if present; otherwise falls back to the on-screen ad slot.
-  async tryNative(){
-    const P = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob;
-    if(!P || !AD.admobInterstitialId) return false;
-    try{ await P.prepareInterstitial({adId: AD.admobInterstitialId}); await P.showInterstitial(); return true; }
-    catch(e){ return false; }
+  everyN: 1,        // show an ad before every Nth open (1 = every time, 2 = every other time)
+  seconds: 5,       // (website overlay only) wait before "Continue" becomes active
+  webOverlay: false,// website has no ad source yet, so links open directly. Set true only after adding AdSense code to #adslot
+  testMode: true,   // TRUE = Google test ads (safe). Set to false only for the final Play Store release.
+                    // NEVER tap real ads on your own app: Google can ban the account.
+  admobInterstitialId: "ca-app-pub-5053693807902862/4181180242",
+  _inited: false,
+  plugin(){
+    const C = window.Capacitor;
+    if(!C || !C.isNativePlatform || !C.isNativePlatform()) return null;
+    return (C.Plugins && C.Plugins.AdMob) || (C.registerPlugin ? C.registerPlugin("AdMob") : null);
+  },
+  // Resolves true when an ad was shown and closed, false if it failed. Never throws.
+  async showNative(){
+    const P = AD.plugin();
+    if(!P) return false;
+    try{
+      if(!AD._inited){ await P.initialize({}); AD._inited = true; }
+      return await new Promise(async resolve=>{
+        const handles = []; let done = false, t = null;
+        const finish = ok=>{
+          if(done) return; done = true; clearTimeout(t);
+          handles.forEach(h=>{ try{ h && h.remove && h.remove(); }catch(e){} });
+          resolve(ok);
+        };
+        t = setTimeout(()=>finish(false), 15000); // gives up if the ad does not load in 15s
+        handles.push(await P.addListener("interstitialAdLoaded", ()=>clearTimeout(t)));
+        handles.push(await P.addListener("interstitialAdDismissed", ()=>finish(true)));
+        handles.push(await P.addListener("interstitialAdFailedToLoad", ()=>finish(false)));
+        handles.push(await P.addListener("interstitialAdFailedToShow", ()=>finish(false)));
+        try{
+          await P.prepareInterstitial({ adId: AD.admobInterstitialId, isTesting: AD.testMode });
+          await P.showInterstitial();
+        }catch(e){ finish(false); }
+      });
+    }catch(e){ return false; }
   }
 };
 
@@ -226,9 +253,11 @@ function openUrl(u){ const w=window.open(u,"_blank","noopener"); if(!w) location
 async function openItem(idx){
   const url=ITEMS[idx][3];
   S.opens++;
-  if(S.opens % AD.everyN !== 0){ openUrl(url); return; }
-  if(await AD.tryNative()){ openUrl(url); return; }
-  showAd(url);
+  if(S.opens % AD.everyN === 0){
+    if(AD.plugin()){ await AD.showNative(); openUrl(url); return; } // Android app: ad first, then the link
+    if(AD.webOverlay){ showAd(url); return; }                        // website: optional placeholder overlay
+  }
+  openUrl(url);
 }
 function showAd(url){
   pendingUrl=url;
