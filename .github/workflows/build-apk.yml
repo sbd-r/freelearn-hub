@@ -8,6 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+      KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
     steps:
       - uses: actions/checkout@v4
 
@@ -26,34 +30,68 @@ jobs:
       - name: Copy web files
         run: |
           mkdir -p www
-          cp index.html style.css app.js data.js data2a.js data2b.js data3.js manifest.json sw.js icon-192.png icon-512.png www/
+          cp index.html main.css main.js config.js i18n.js ads.js data.js data2a.js data2b.js data3.js data4.js data5.js manifest.json sw.js icon-192.png icon-512.png www/
 
       - name: Create Android project
-        run: |
-          npx cap add android
-          npx cap sync android
+        run: npx cap add android
 
-      - name: Add AdMob App ID to Android manifest
+      - name: Icon and splash screen
+        run: |
+          pip install pillow
+          python3 make_icons.py
+
+      - name: Sync web files
+        run: npx cap sync android
+
+      - name: AdMob App ID and version number
+        env:
+          RUN: ${{ github.run_number }}
         run: |
           python3 - <<'PY'
+          import os, re
           p = "android/app/src/main/AndroidManifest.xml"
           s = open(p).read()
           meta = '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-5053693807902862~4627902805"/>\n    '
           assert "</application>" in s, "application tag not found"
-          s = s.replace("</application>", meta + "</application>", 1)
+          if "APPLICATION_ID" not in s:
+              s = s.replace("</application>", meta + "</application>", 1)
           open(p, "w").write(s)
-          print("AdMob App ID added")
+          g = "android/app/build.gradle"
+          t = open(g).read()
+          n = os.environ["RUN"]
+          t = re.sub(r"versionCode \d+", "versionCode " + n, t, count=1)
+          t = re.sub(r'versionName "[^"]*"', 'versionName "1.1.' + n + '"', t, count=1)
+          open(g, "w").write(t)
+          print("manifest and version updated")
           PY
 
-      - name: Build debug APK
+      - name: Build
         run: |
-          chmod +x android/gradlew
           cd android
-          ./gradlew assembleDebug
+          chmod +x gradlew
+          if [ -n "$KS_B64" ]; then ./gradlew assembleRelease; else ./gradlew assembleDebug; fi
 
-      - name: Upload APK
+      - name: Sign release APK
+        if: env.KS_B64 != ''
+        run: |
+          set -e
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          echo "$KS_B64" | base64 -d > release.jks
+          "$BT/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+          "$BT/apksigner" sign --ks release.jks --ks-pass env:KS_PASS --ks-key-alias "$KEY_ALIAS" --key-pass env:KS_PASS --out freelearn-release.apk aligned.apk
+          "$BT/apksigner" verify --verbose freelearn-release.apk | head -4
+          rm -f release.jks aligned.apk
+
+      - name: Upload signed APK
+        if: env.KS_B64 != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: freelearn-apk
+          path: freelearn-release.apk
+
+      - name: Upload debug APK (no signing key set yet)
+        if: env.KS_B64 == ''
         uses: actions/upload-artifact@v4
         with:
           name: freelearn-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          
