@@ -3,56 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ফ্রিলার্ন হাব</title>
-<meta name="theme-color" content="#0f766e">
-<meta name="description" content="Free courses, open books and free software from around the world.">
+<title>FreeLearn Hub</title>
+<meta name="theme-color" content="#2441C4">
+<meta name="description" content="Free courses, books, YouTube videos and software from around the world.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="main.css">
 </head>
 <body>
-<header>
-  <div class="top">
-    <div style="min-width:0;flex:1">
-      <div class="logo" id="appName"></div>
-      <div class="tag" id="tagline"></div>
-    </div>
-    <button class="iconbtn" id="savedBtn" aria-pressed="false" aria-label="Saved">★</button>
-    <select id="lang" aria-label="Language">
-      <option value="bn">বাংলা</option>
-      <option value="en">English</option>
-      <option value="hi">हिन्दी</option>
-      <option value="ur">اردو</option>
-    </select>
+<header class="bar">
+  <button class="brand" data-go="home">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2" width="18" height="20" rx="3" fill="var(--pen)"/><path d="M8 2v20" stroke="var(--margin)" stroke-width="1.6"/><path d="M11.5 8h6M11.5 12h6M11.5 16h4" stroke="var(--pen-ink)" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span id="brandName"></span>
+  </button>
+  <div class="acts">
+    <button class="ibtn" id="shareBtn" data-act="share"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="m8 11 8-4M8 13l8 4"/></svg></button>
+    <button class="ibtn txt" id="langBtn" data-act="lang"></button>
   </div>
-  <div class="search"><input id="q" type="search" autocomplete="off"></div>
 </header>
-
-<nav class="tabs" id="tabs" role="tablist"></nav>
-<div class="chips" id="chips"></div>
-<main>
-  <p class="count" id="count"></p>
-  <div id="list"></div>
-  <button class="more" id="more" hidden></button>
-</main>
-<footer id="disc"></footer>
-
-<div class="ad" id="ad" hidden>
-  <div class="adbox" role="dialog" aria-modal="true">
-    <button class="adx" id="adx" aria-label="Close">×</button>
-    <div class="adtag" id="adtag"></div>
-    <!-- AD SLOT: put your AdSense / ad network code inside this div. For AdMob (native Android) this slot is not used. -->
-    <div class="adslot" id="adslot">AD · 300×250</div>
-    <p class="adnote" id="adnote"></p>
-    <button class="adgo" id="adgo" disabled></button>
-  </div>
-</div>
-
+<main id="view"></main>
+<nav class="dock" id="dock"></nav>
+<div id="layer"></div>
+<script src="config.js"></script>
+<script src="i18n.js"></script>
 <script src="data.js"></script>
 <script src="data2a.js"></script>
 <script src="data2b.js"></script>
 <script src="data3.js"></script>
-<script src="app.js"></script>
+<script src="data4.js"></script>
+<script src="data5.js"></script>
+<script src="ads.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
