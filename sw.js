@@ -1,6 +1,5 @@
-const CACHE = "freelearn-v6";
-const FILES = ["./", "index.html", "main.css", "main.js", "theme.css", "theme.js", "config.js", "i18n.js", "ads.js", "data.js", "data2a.js", "data2b.js", "data3.js", "data4.js", "data5.js", "manifest.json", "icon-192.png", "icon-512.png"];
-
+const CACHE = "freelearn-v7";
+const FILES = ["./", "index.html", "main.css", "main.js", "theme.css", "theme.js", "lib.js", "config.js", "i18n.js", "ads.js", "data.js", "data2a.js", "data2b.js", "data3.js", "data4.js", "data5.js", "manifest.json", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
