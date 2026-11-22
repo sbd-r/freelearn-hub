@@ -31,6 +31,7 @@ jobs:
 
       - name: Copy web files
         run: |
+          mkdir -p www
           cp index.html main.css main.js theme.css theme.js lib.js config.js i18n.js ads.js data.js data2a.js data2b.js data3.js data4.js data5.js data6.js manifest.json sw.js icon-192.png icon-512.png www/
 
       - name: Create Android project
