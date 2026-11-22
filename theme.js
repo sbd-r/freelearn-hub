@@ -25,6 +25,26 @@ function getCard() {
   document.head.appendChild(st);
 })();
 
+/* Cross-link to the জনদূত app (same developer). Android and in-app: direct APK; iPhone and others: the website. */
+const JD_APK = "https://github.com/sbd-r/jonodut-app/releases/latest/download/jonodut-release.apk";
+const JD_SITE = "https://sbd-r.github.io/jonodut/";
+const JD = {
+  bn: ["জনদূত: অভিযোগ ও দরখাস্ত", "ঘুষ-দুর্নীতি, মাদক, চাঁদাবাজি, জমি দখল, নারী ও শিশু নির্যাতন, সাইবার প্রতারণাসহ ৩০টিরও বেশি সমস্যায় অধিকার জানুন, দরখাস্ত লিখুন এবং সঠিক দপ্তরে পাঠান: থানার ওসি, পুলিশ সুপার (এসপি), উপজেলা নির্বাহী কর্মকর্তা (ইউএনও), জেলা প্রশাসক (ডিসি), দুদক ও অন্যান্য দপ্তর। একই ডেভেলপারের ফ্রি অ্যাপ।", "জনদূত অ্যাপ নামান", "জনদূত খুলুন"],
+  en: ["Jonodut: complaints & petitions", "Corruption, drugs, extortion, land grabbing, violence against women and children, cyber fraud and 30+ other problems: know your rights, write a petition and send it to the right office: police station (OC), Superintendent of Police (SP), Upazila Nirbahi Officer (UNO), Deputy Commissioner (DC), ACC and more. A free app by the same developer.", "Get Jonodut app", "Open Jonodut"],
+  hi: ["जनदूत: शिकायत व आवेदन", "रिश्वत-भ्रष्टाचार, नशा, रंगदारी, ज़मीन कब्ज़ा, महिला-बाल उत्पीड़न, साइबर ठगी समेत 30+ समस्याओं में अधिकार जानें, आवेदन लिखें और सही दफ़्तर को भेजें: थाना (ओसी), पुलिस अधीक्षक (एसपी), उपज़िला निर्वाही अधिकारी (यूएनओ), ज़िलाधिकारी (डीसी), ACC आदि। उसी डेवलपर का मुफ़्त ऐप।", "जनदूत ऐप पाएं", "जनदूत खोलें"],
+  ur: ["جن دوت: شکایات اور درخواستیں", "رشوت و بدعنوانی، منشیات، بھتہ، زمین پر قبضہ، خواتین و بچوں پر تشدد، سائبر فراڈ سمیت 30 سے زیادہ مسائل میں حقوق جانیں، درخواست لکھیں اور صحیح دفتر کو بھیجیں: تھانہ (او سی)، پولیس سپرنٹنڈنٹ (ایس پی)، اپزلا نربہی افسر (یو این او)، ڈپٹی کمشنر (ڈی سی)، اے سی سی وغیرہ۔ اسی ڈیولپر کی مفت ایپ۔", "جن دوت ایپ حاصل کریں", "جن دوت کھولیں"]
+};
+function jdCard() {
+  const g = JD[S.lang] || JD.en;
+  const apk = inApp() || !isIOS();
+  return `<a class="jdc" href="${apk ? JD_APK : JD_SITE}" ${apk ? "" : 'target="_blank" rel="noopener"'}><svg width="40" height="44" viewBox="0 0 72 80" aria-hidden="true"><path d="M36 3 66 14v24c0 19-12 33-30 39C18 71 6 57 6 38V14z" fill="#0b6b4a" stroke="#e8a317" stroke-width="4"/><rect x="22" y="20" width="28" height="34" rx="3" fill="#fff"/><path d="M27 29h18M27 35h18M27 41h11" stroke="#0b6b4a" stroke-width="2.5" stroke-linecap="round"/><circle cx="46" cy="50" r="11" fill="#e8a317"/><path d="m40.5 50 4 4 7-8" fill="none" stroke="#0d1814" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="gt"><b>${esc(g[0])}</b><small>${esc(g[1])}</small></span><span class="gb">${esc(apk ? g[2] : g[3])}</span></a>`;
+}
+(function () {
+  const st = document.createElement("style");
+  st.textContent = ".jdc{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0 0;padding:14px;border-radius:22px;background:#0b6b4a;color:#fff;text-decoration:none}.jdc svg{flex:none}.jdc .gt{flex:1;min-width:0}.jdc b{display:block;font-weight:800;line-height:1.3}.jdc small{display:block;font-size:13px;line-height:1.4;opacity:.92}.jdc .gb{flex:1 1 100%;box-sizing:border-box;text-align:center;padding:11px 14px;border-radius:12px;background:#e8a317;color:#0d1814;font-weight:700;font-size:14px}";
+  document.head.appendChild(st);
+})();
+
 homeBody = function () {
   if (S.q.trim()) {
     const res = ALL.filter(x => hit(x, S.q));
@@ -37,6 +57,7 @@ homeBody = function () {
   return `${getCard()}<h2 class="sec">${esc(tl("byTopic"))}</h2><ul class="tiles">${tiles}</ul>
 ${all.length > shown.length || S.allTopics ? `<button class="lnk" data-act="topics">${esc(tl(S.allTopics ? "fewer" : "allTopics"))}</button>` : ""}
 <h2 class="sec">${esc(tl("byType"))}</h2><div class="strip">${strip}</div>
+${jdCard()}
 ${partnersBlock()}
 <div class="foot"><button class="lnk" data-go="about">${esc(tl("developer"))}: ${esc(CONFIG.developer.name)}</button></div>`;
 };
@@ -100,3 +121,4 @@ render(false);
   };
   btn.addEventListener("click", open);
 })();
+ 
