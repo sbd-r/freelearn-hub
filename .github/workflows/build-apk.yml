@@ -17,6 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get the website files (sbd-r/freelearnhub)
+        uses: actions/checkout@v4
+        with:
+          repository: sbd-r/freelearnhub
+          path: site
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -29,11 +35,25 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Copy web files
+      - name: Prepare web files for the app
+        env:
+          RUN: ${{ github.run_number }}
         run: |
           mkdir -p www
-          echo "window.BUILD=${{ github.run_number }};" > www/build.js
-          cp index.html main.css main.js theme.css theme.js lib.js update.js config.js i18n.js ads.js data.js data2a.js data2b.js data3.js data4.js data5.js data6.js manifest.json sw.js icon-192.png icon-512.png www/
+          cp -r site/. www/
+          rm -rf www/.git www/.github
+          printf 'window.FL_BUILD=%s;\n' "$RUN" | cat - native.js > www/native.js
+          python3 - <<'PY'
+          import glob
+          for p in glob.glob("www/**/*.html", recursive=True):
+              s = open(p, encoding="utf-8").read()
+              # the page script can contain the text </body> inside a string, so use the LAST one
+              if "native.js" not in s and "</body>" in s:
+                  i = s.rfind("</body>")
+                  s = s[:i] + '<script src="native.js"></script>\n' + s[i:]
+              open(p, "w", encoding="utf-8").write(s)
+          print("pages prepared")
+          PY
 
       - name: Create Android project
         run: npx cap add android
